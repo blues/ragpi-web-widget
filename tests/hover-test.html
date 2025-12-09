@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hover Test</title>
+</head>
+<body>
+    <script>
+        (async () => {
+            // Navigate to the test page
+            window.location.href = 'http://localhost:8000/test.html';
+
+            // Wait for page to load
+            await new Promise(resolve => window.addEventListener('load', resolve));
+
+            // Wait for button
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Find button and trigger hover programmatically
+            const button = document.querySelector('button');
+            if (button) {
+                const mouseEnter = new MouseEvent('mouseenter', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                button.dispatchEvent(mouseEnter);
+            }
+        })();
+    </script>
+</body>
+</html>
