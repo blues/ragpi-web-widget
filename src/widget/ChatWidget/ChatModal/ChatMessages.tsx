@@ -6,14 +6,10 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 
 interface Props {
-  placeholder?: string;
   messages: ChatMessage[];
 }
 
-export const ChatMessages = ({
-  messages,
-  placeholder = "Send a message to start chatting with the AI assistant.",
-}: Props) => {
+export const ChatMessages = ({ messages }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,7 +24,19 @@ export const ChatMessages = ({
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
         <div className="h-full flex items-center justify-center">
-          <p className="text-gray-500 text-center">{placeholder}</p>
+          <p className="text-gray-500 text-center">
+            Ask the Blues AI technical and/or product questions. Want to talk
+            to a human? Reach out on the{" "}
+            <a
+              href="https://discuss.blues.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Blues Forum
+            </a>
+            .
+          </p>
         </div>
       ) : (
         <div>

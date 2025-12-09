@@ -1,16 +1,61 @@
+import { useEffect } from "react";
+
 interface Props {
   text?: string;
   onClick: () => void;
 }
 
-export const ChatButton = ({ text = "Ask AI", onClick }: Props) => {
+export const ChatButton = ({ text = "Ask Blues AI a question...", onClick }: Props) => {
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const shortcutText = isMac ? '⌘I' : 'Ctrl-I';
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'i') {
+        e.preventDefault();
+        onClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClick]);
+
   return (
-    <button
-      onClick={onClick}
-      className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-secondary rounded-lg p-4 z-50 cursor-pointer text-lg"
-      aria-label="Open chat"
+    <div
+      className="fixed bottom-6 z-50"
+      style={{ left: '50%', transform: 'translateX(-50%)' }}
     >
-      {text}
-    </button>
+      <button
+        onClick={onClick}
+        className="bg-white hover:bg-gray-50 text-gray-600 rounded-2xl px-5 py-2.5 cursor-pointer shadow-lg flex items-center gap-4 transition-all duration-500 hover:scale-105"
+        style={{ border: '1px solid #D1D5DB' }}
+        aria-label="Open chat"
+      >
+        <span className="text-base">{text}</span>
+        <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-white"
+          >
+            <path
+              d="M8 3L8 13M8 3L4 7M8 3L12 7"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </button>
+    </div>
   );
 };

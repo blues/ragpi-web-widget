@@ -25,11 +25,12 @@ export const ChatModal = ({
 }: Props) => {
   return (
     <div
-      className="fixed inset-0 bg-gray-800/50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-gray-200/30 flex items-center justify-center p-4 z-50 animate-fadeIn"
       onClick={onCloseModal}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-md md:max-w-4xl"
+        className="bg-white rounded-lg w-full max-w-md md:max-w-4xl border-2 border-gray-800 animate-scaleIn"
+        style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <ChatHeader onCloseModal={onCloseModal} logoUrl={logoUrl} />

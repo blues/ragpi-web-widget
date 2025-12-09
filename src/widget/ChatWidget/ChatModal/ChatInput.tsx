@@ -60,17 +60,19 @@ export const ChatInput = ({
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleTextAreaKeyDown}
           className="flex-1 border border-solid border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-          placeholder="Ask me a question..."
+          placeholder="Type your message..."
           maxRows={10}
         />
         <button
           type="submit"
           disabled={loading || !inputText.trim()}
-          className={`px-4 py-2 rounded-xl ml-3 text-secondary ${
-            loading || !inputText.trim()
-              ? "bg-primary/50 cursor-not-allowed"
-              : "bg-primary hover:bg-primary/90 cursor-pointer"
-          }`}
+          className="px-4 py-2 rounded-xl ml-3 text-white cursor-pointer"
+          style={{
+            backgroundColor: loading || !inputText.trim()
+              ? 'rgba(62, 90, 255, 0.4)'
+              : 'rgba(62, 90, 255, 0.8)',
+            cursor: loading || !inputText.trim() ? 'not-allowed' : 'pointer'
+          }}
         >
           {loading ? (
             <svg
@@ -111,7 +113,20 @@ export const ChatInput = ({
           )}
         </button>
       </div>
-      {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+      {error && (
+        <div className="text-red-500 text-sm mt-2">
+          {error} Try reaching out on the{" "}
+          <a
+            href="https://discuss.blues.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-red-700"
+          >
+            Blues Forum
+          </a>
+          .
+        </div>
+      )}
     </form>
   );
 };

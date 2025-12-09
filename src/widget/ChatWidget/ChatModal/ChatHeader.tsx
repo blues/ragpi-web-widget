@@ -6,7 +6,7 @@ interface Props {
 
 export const ChatHeader = ({
   logoUrl,
-  heading = "Ask AI",
+  heading = "Blues AI: Your Technical Assistant",
   onCloseModal,
 }: Props) => {
   return (

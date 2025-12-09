@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ragpi Widget Widget Test - Hover State</title>
+    <style>
+      /* Force hover state on the button */
+      button {
+        transform: scale(1.1) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Ragpi Widget Widget Test</h1>
+    <script
+      src="./dist/ragpi-widget.js"
+      data-recaptcha-site-key="6Lchqv0qAAAAAG3VayanOfH0M2x3yIqFqI8OFfei"
+      data-ragpi-gateway-url="http://localhost:8080/chat"
+      data-ragpi-sources="fastapi_docs"
+      data-primary-color="#fb2c36"
+    ></script>
+    <script>
+      // Wait for widget to load and force hover state
+      setTimeout(() => {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+          // Force the scale transform
+          button.style.transform = 'scale(1.1)';
+          button.style.transition = 'transform 0.3s ease';
+        });
+
+        // Also try to find it in shadow DOM
+        const shadowHosts = document.querySelectorAll('*');
+        shadowHosts.forEach(host => {
+          if (host.shadowRoot) {
+            const shadowButtons = host.shadowRoot.querySelectorAll('button');
+            shadowButtons.forEach(button => {
+              button.style.transform = 'scale(1.1)';
+              button.style.transition = 'transform 0.3s ease';
+            });
+          }
+        });
+      }, 2000);
+    </script>
+  </body>
+</html>
