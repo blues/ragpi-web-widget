@@ -25,8 +25,8 @@ export const ChatMessages = ({ messages }: Props) => {
       {messages.length === 0 ? (
         <div className="h-full flex items-center justify-center">
           <p className="text-gray-500 text-center">
-            Ask the Blues AI technical and/or product questions. Want to talk
-            to a human? Reach out on the{" "}
+            Ask Blues AI your technical or product questions. Want to talk to a
+            human? Reach out on the{" "}
             <a
               href="https://discuss.blues.com"
               target="_blank"
