@@ -1,9 +1,28 @@
 import { ChatMessage } from "../types";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+// Use Light build instead of Prism - saves ~400KB
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+// Import only commonly used languages
+import javascript from "react-syntax-highlighter/dist/esm/languages/hljs/javascript";
+import typescript from "react-syntax-highlighter/dist/esm/languages/hljs/typescript";
+import python from "react-syntax-highlighter/dist/esm/languages/hljs/python";
+import bash from "react-syntax-highlighter/dist/esm/languages/hljs/bash";
+import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import cpp from "react-syntax-highlighter/dist/esm/languages/hljs/cpp";
+import c from "react-syntax-highlighter/dist/esm/languages/hljs/c";
+// Use a lighter style
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import remarkGfm from "remark-gfm";
+
+// Register only the languages we need
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('bash', bash);
+SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage('cpp', cpp);
+SyntaxHighlighter.registerLanguage('c', c);
 
 interface Props {
   messages: ChatMessage[];
@@ -77,7 +96,7 @@ export const ChatMessages = ({ messages }: Props) => {
                               PreTag="div"
                               children={String(children).replace(/\n$/, "")}
                               language={match[1]}
-                              style={vscDarkPlus}
+                              style={docco}
                             />
                           ) : (
                             <code {...props} className={className}>
