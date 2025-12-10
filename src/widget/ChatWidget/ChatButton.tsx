@@ -8,8 +8,26 @@ interface Props {
 
 export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHide }: Props) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   const shortcutText = isMac ? '⌘I' : 'Ctrl-I';
+
+  useEffect(() => {
+    // Detect if it's a touch device
+    const checkTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsTouchDevice(checkTouchDevice);
+
+    // Detect mobile screen size
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,6 +46,13 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
     onHide();
   };
 
+  // Use shorter text on mobile
+  const displayText = isMobile ? "Ask Blues AI" : text;
+  // Show close button on touch devices or when hovered
+  const showCloseButton = isTouchDevice || isHovered;
+  // Thicker arrow on mobile
+  const arrowStrokeWidth = isMobile ? "3" : "2";
+
   return (
     <div
       className="fixed bottom-6 z-50"
@@ -42,8 +67,8 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
           style={{ border: '1px solid #D1D5DB' }}
           aria-label="Open chat"
         >
-          <span className="text-base">{text}</span>
-          <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>
+          <span className="text-base">{displayText}</span>
+          {!isMobile && <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>}
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
@@ -59,14 +84,14 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
               <path
                 d="M8 3L8 13M8 3L4 7M8 3L12 7"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth={arrowStrokeWidth}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </div>
         </button>
-        {isHovered && (
+        {showCloseButton && (
           <button
             onClick={handleCloseClick}
             className="absolute -top-2 -right-2 w-6 h-6 bg-gray-700 hover:bg-gray-900 text-white rounded-full flex items-center justify-center transition-all duration-200 opacity-80 hover:opacity-100"
