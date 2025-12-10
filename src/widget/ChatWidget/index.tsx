@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import root from "react-shadow";
 import { ChatModal } from "./ChatModal";
 import { ChatButton } from "./ChatButton";
+import { HubIconButton } from "./HubIconButton";
 import { ChatMessage, ChatRequest, ChatResponse } from "./types";
 import styles from "./styles.css?inline";
 
@@ -12,6 +13,7 @@ interface Props {
   primaryColor?: string;
   secondaryColor?: string;
   logoUrl?: string;
+  closedIconPosition?: 'bottom-left' | 'bottom-right';
 }
 
 export const ChatWidget = ({
@@ -21,11 +23,16 @@ export const ChatWidget = ({
   primaryColor,
   secondaryColor,
   logoUrl = "https://docs.ragpi.io/img/ragpi-logo-black.png",
+  closedIconPosition = 'bottom-right',
 }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(() => {
+    const stored = localStorage.getItem('ragpi-widget-visible');
+    return stored === null ? true : stored === 'true';
+  });
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenModal = () => {
@@ -34,6 +41,15 @@ export const ChatWidget = ({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleHideWidget = () => {
+    setIsWidgetVisible(false);
+    setIsModalOpen(false);
+  };
+
+  const handleShowWidget = () => {
+    setIsWidgetVisible(true);
   };
 
   const handleSendMessage = async (message: string, recaptchaToken: string) => {
@@ -102,6 +118,11 @@ export const ChatWidget = ({
   }, [isModalOpen]);
 
   useEffect(() => {
+    // Persist widget visibility to localStorage
+    localStorage.setItem('ragpi-widget-visible', String(isWidgetVisible));
+  }, [isWidgetVisible]);
+
+  useEffect(() => {
     // Default Colors are set in the index.css file
     if (containerRef.current) {
       if (primaryColor) {
@@ -124,18 +145,25 @@ export const ChatWidget = ({
   return (
     <root.div ref={containerRef}>
       <style type="text/css">{styles}</style>
-      <ChatButton onClick={handleOpenModal} />
 
-      {isModalOpen && (
-        <ChatModal
-          logoUrl={logoUrl}
-          recaptchaSiteKey={recaptchaSiteKey}
-          onCloseModal={handleCloseModal}
-          onSendMessage={handleSendMessage}
-          messages={messages}
-          loading={isFetching}
-          error={error}
-        />
+      {isWidgetVisible ? (
+        <>
+          <ChatButton onClick={handleOpenModal} onHide={handleHideWidget} />
+
+          {isModalOpen && (
+            <ChatModal
+              logoUrl={logoUrl}
+              recaptchaSiteKey={recaptchaSiteKey}
+              onCloseModal={handleCloseModal}
+              onSendMessage={handleSendMessage}
+              messages={messages}
+              loading={isFetching}
+              error={error}
+            />
+          )}
+        </>
+      ) : (
+        <HubIconButton onClick={handleShowWidget} position={closedIconPosition} />
       )}
     </root.div>
   );

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 interface Props {
   logoUrl: string;
   heading?: string;
@@ -9,11 +11,26 @@ export const ChatHeader = ({
   heading = "Blues AI: Your Technical Assistant",
   onCloseModal,
 }: Props) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const displayHeading = isMobile ? "Blues AI" : heading;
+
   return (
     <div className="flex justify-between items-center p-4 border-b border-solid border-gray-300">
       <div className="flex items-center">
         <img src={logoUrl} alt="RAGPI Logo" className="h-8 mr-3" />
-        <p className="text-2xl font-semibold text-gray-800">{heading}</p>
+        <p className="text-2xl font-semibold text-gray-800">{displayHeading}</p>
       </div>
       <button
         onClick={onCloseModal}

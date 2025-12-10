@@ -1,9 +1,28 @@
 import { ChatMessage } from "../types";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+// Use Light build instead of Prism - saves ~400KB
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+// Import only commonly used languages
+import javascript from "react-syntax-highlighter/dist/esm/languages/hljs/javascript";
+import typescript from "react-syntax-highlighter/dist/esm/languages/hljs/typescript";
+import python from "react-syntax-highlighter/dist/esm/languages/hljs/python";
+import bash from "react-syntax-highlighter/dist/esm/languages/hljs/bash";
+import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import cpp from "react-syntax-highlighter/dist/esm/languages/hljs/cpp";
+import c from "react-syntax-highlighter/dist/esm/languages/hljs/c";
+// Use a lighter style
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import remarkGfm from "remark-gfm";
+
+// Register only the languages we need
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('bash', bash);
+SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage('cpp', cpp);
+SyntaxHighlighter.registerLanguage('c', c);
 
 interface Props {
   messages: ChatMessage[];
@@ -11,6 +30,7 @@ interface Props {
 
 export const ChatMessages = ({ messages }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -20,23 +40,36 @@ export const ChatMessages = ({ messages }: Props) => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
         <div className="h-full flex items-center justify-center">
-          <p className="text-gray-500 text-center">
-            Ask the Blues AI technical and/or product questions. Want to talk
-            to a human? Reach out on the{" "}
-            <a
-              href="https://discuss.blues.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Blues Forum
-            </a>
-            .
-          </p>
+          {!isMobile && (
+            <p className="text-gray-500 text-center">
+              Ask Blues AI your technical or product questions. Want to talk to a
+              human? Reach out on the{" "}
+              <a
+                href="https://discuss.blues.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Blues Forum
+              </a>
+              .
+            </p>
+          )}
         </div>
       ) : (
         <div>
@@ -63,7 +96,7 @@ export const ChatMessages = ({ messages }: Props) => {
                               PreTag="div"
                               children={String(children).replace(/\n$/, "")}
                               language={match[1]}
-                              style={vscDarkPlus}
+                              style={docco}
                             />
                           ) : (
                             <code {...props} className={className}>
