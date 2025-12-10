@@ -52,6 +52,13 @@ export const ChatWidget = ({
     setIsWidgetVisible(true);
   };
 
+  const handleClearHistory = () => {
+    // Clear messages state
+    setMessages([]);
+    // Clear error state
+    setError(null);
+  };
+
   const handleSendMessage = async (message: string, recaptchaToken: string) => {
     setIsFetching(true);
     setError(null);
@@ -155,6 +162,7 @@ export const ChatWidget = ({
               logoUrl={logoUrl}
               recaptchaSiteKey={recaptchaSiteKey}
               onCloseModal={handleCloseModal}
+              onClearHistory={handleClearHistory}
               onSendMessage={handleSendMessage}
               messages={messages}
               loading={isFetching}
