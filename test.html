@@ -5,10 +5,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ragpi Widget Widget Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .repl-container {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 33.333%;
+      height: 100vh;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      border-left: 2px solid #333;
+      overflow-y: auto;
+      z-index: 40;
+      transition: transform 0.3s ease;
+    }
+
+    .repl-container.hidden {
+      transform: translateX(100%);
+    }
+
+    .repl-header {
+      padding: 20px;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #333;
+    }
+
+    .repl-content {
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    .toggle-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 50;
+      transition: background-color 0.2s;
+    }
+
+    .toggle-button:hover {
+      background-color: #005a9e;
+    }
+
+    .content-area {
+      max-width: 66.666%;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Ragpi Widget Widget Test</h1>
+  <div class="content-area">
+    <h1>Ragpi Widget Widget Test</h1>
+    <p>This is a test page for the Ragpi widget. Toggle the REPL panel on the right to test the closed icon positioning.</p>
+  </div>
+
+  <button class="toggle-button" id="toggleRepl">Toggle REPL</button>
+
+  <div class="repl-container hidden REPL" id="replPanel">
+    <div class="repl-header">
+      <h2 style="margin: 0; font-size: 16px;">REPL Console</h2>
+    </div>
+    <div class="repl-content">
+      <p>&gt; Welcome to the REPL environment</p>
+      <p>&gt; This panel simulates a code REPL interface</p>
+      <p>&gt; The closed widget icon should shift to the left when this panel is visible</p>
+      <p>&gt; and positioned in the bottom-right corner</p>
+    </div>
+  </div>
+
+  <script>
+    // Toggle REPL visibility
+    const toggleBtn = document.getElementById('toggleRepl');
+    const replPanel = document.getElementById('replPanel');
+
+    toggleBtn.addEventListener('click', () => {
+      replPanel.classList.toggle('hidden');
+      toggleBtn.textContent = replPanel.classList.contains('hidden') ? 'Toggle REPL' : 'Hide REPL';
+    });
+  </script>
+
   <script src="./dist/ragpi-widget.js" data-recaptcha-site-key="6Lchqv0qAAAAAG3VayanOfH0M2x3yIqFqI8OFfei"
     data-ragpi-gateway-url="http://localhost:8080/chat" data-ragpi-sources="fastapi_docs" data-primary-color="#fb2c36"
     data-logo-url="http://localhost:8000/blues-logo.png" data-closed-icon-position="bottom-right"></script>
