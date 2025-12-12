@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useState, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
 declare global {
@@ -27,6 +27,14 @@ export const ChatInput = ({
   error,
 }: Props) => {
   const [inputText, setInputText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-focus the input when the component mounts
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
 
   const handleTextAreaKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -56,6 +64,7 @@ export const ChatInput = ({
     <form onSubmit={handleSubmit} className="py-4">
       <div className="flex items-center">
         <TextareaAutosize
+          ref={textareaRef}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleTextAreaKeyDown}

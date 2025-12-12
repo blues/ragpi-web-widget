@@ -1,7 +1,7 @@
 {
   "name": "ragpi-web-widget",
   "private": true,
-  "version": "2.0.4",
+  "version": "2.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
-    "react": "^19.2.2",
-    "react-dom": "^19.2.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",
     "react-shadow": "^20.6.0",
     "react-syntax-highlighter": "^16.1.0",
