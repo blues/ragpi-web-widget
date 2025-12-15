@@ -141,6 +141,15 @@ export const ChatMessages = ({ messages }: Props) => {
                             />
                           );
                         },
+                        a({ ...props }) {
+                          return (
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              {...props}
+                            />
+                          );
+                        },
                       }}
                     >
                       {message.content}
