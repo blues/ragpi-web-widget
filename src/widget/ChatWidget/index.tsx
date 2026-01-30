@@ -27,10 +27,6 @@ export const ChatWidget = ({
   closedIconPosition = 'bottom-right',
   enabled = true,
 }: Props) => {
-  // If widget is disabled, render nothing
-  if (!enabled) {
-    return null;
-  }
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -154,6 +150,11 @@ export const ChatWidget = ({
       }
     }
   }, [primaryColor, secondaryColor]);
+
+  // If widget is disabled, render nothing
+  if (!enabled) {
+    return null;
+  }
 
   return (
     <root.div ref={containerRef}>

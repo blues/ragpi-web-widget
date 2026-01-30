@@ -38,7 +38,7 @@ export const ChatHeader = ({
   return (
     <div className="flex justify-between items-center p-4 border-b border-solid border-gray-300">
       <div className="flex items-center">
-        <img src={logoUrl} alt="RAGPI Logo" className="h-8 mr-3" />
+        <img src={logoUrl} alt="blues logo" className="h-8 mr-3" />
         <p className="text-2xl font-semibold text-gray-800">{displayHeading}</p>
       </div>
       <div className="flex items-center gap-3">

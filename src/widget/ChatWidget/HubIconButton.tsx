@@ -11,13 +11,13 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
   const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only check for overlaps if the position is bottom-right
-    if (position !== 'bottom-right') {
-      setShouldShiftLeft(false);
-      return;
-    }
-
     const checkOverlap = () => {
+      // Only check for overlaps if the position is bottom-right
+      if (position !== 'bottom-right') {
+        setShouldShiftLeft(false);
+        setShouldHide(false);
+        return;
+      }
       // Use actual dimensions if available, otherwise use default (48x48 for w-12 h-12)
       const buttonWidth = buttonRef.current?.getBoundingClientRect().width || 48;
       const buttonHeight = buttonRef.current?.getBoundingClientRect().height || 48;
