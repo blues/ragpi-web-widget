@@ -35,7 +35,7 @@ export const ChatModal = ({
         style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <ChatHeader onCloseModal={onCloseModal} onClearHistory={onClearHistory} logoUrl={logoUrl} />
+        <ChatHeader onCloseModal={onCloseModal} onClearHistory={onClearHistory} logoUrl={logoUrl} hasHistory={messages.length > 0} />
 
         <div
           className="bg-white max-h-[80vh] flex flex-col p-4 rounded-lg"
