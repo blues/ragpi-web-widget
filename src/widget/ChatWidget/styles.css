@@ -121,13 +121,13 @@
 }
 
 .prose a {
-  color: #2563eb;
+  color: #1a0dab;
   text-decoration: underline;
   font-weight: 500;
 }
 
 .prose a:hover {
-  color: #1d4ed8;
+  color: #551a8b;
 }
 
 .prose strong {
