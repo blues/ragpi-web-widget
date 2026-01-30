@@ -14,19 +14,17 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
   const shortcutText = isMac ? '⌘I' : 'Ctrl-I';
 
   useEffect(() => {
-    // Detect if it's a touch device
-    const checkTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    setIsTouchDevice(checkTouchDevice);
-
-    // Detect mobile screen size
-    const checkMobile = () => {
+    // Detect mobile screen size and touch device
+    const checkDeviceProperties = () => {
+      const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsTouchDevice(isTouchCapable);
       setIsMobile(window.innerWidth < 768);
     };
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    checkDeviceProperties();
+    window.addEventListener('resize', checkDeviceProperties);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkDeviceProperties);
   }, []);
 
   useEffect(() => {

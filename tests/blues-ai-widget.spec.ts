@@ -296,9 +296,6 @@ test.describe('Blues AI Widget - Comprehensive Tests', () => {
         console.log(`  Fill: ${buttonStyles.fill}`);
 
         // Check if any of these match the expected blue color
-        const expectedRgba = 'rgba(62, 90, 255, 0.8)';
-        const expectedRgb = 'rgb(62, 90, 255)';
-
         const hasBlueColor =
           buttonStyles.backgroundColor.includes('62') ||
           buttonStyles.backgroundColor.includes('90') ||
