@@ -14,6 +14,7 @@ interface Props {
   secondaryColor?: string;
   logoUrl?: string;
   closedIconPosition?: 'bottom-left' | 'bottom-right';
+  enabled?: boolean;
 }
 
 export const ChatWidget = ({
@@ -24,7 +25,12 @@ export const ChatWidget = ({
   secondaryColor,
   logoUrl = "https://docs.ragpi.io/img/ragpi-logo-black.png",
   closedIconPosition = 'bottom-right',
+  enabled = true,
 }: Props) => {
+  // If widget is disabled, render nothing
+  if (!enabled) {
+    return null;
+  }
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isFetching, setIsFetching] = useState(false);

@@ -27,6 +27,8 @@ const initWidget = () => {
   const logoUrl = scriptTag.getAttribute("data-logo-url") || undefined;
   const closedIconPosition =
     (scriptTag.getAttribute("data-closed-icon-position") as 'bottom-left' | 'bottom-right') || undefined;
+  const enabledAttr = scriptTag.getAttribute("data-enabled");
+  const enabled = enabledAttr === null ? true : enabledAttr !== 'false';
 
   if (!recaptchaSiteKey) {
     console.error("Missing data-recaptcha-site-key attribute");
@@ -59,6 +61,7 @@ const initWidget = () => {
       secondaryColor={secondaryColor}
       logoUrl={logoUrl}
       closedIconPosition={closedIconPosition}
+      enabled={enabled}
     />
   );
 };

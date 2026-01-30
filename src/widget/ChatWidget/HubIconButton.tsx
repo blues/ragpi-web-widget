@@ -7,6 +7,7 @@ interface Props {
 
 export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => {
   const [shouldShiftLeft, setShouldShiftLeft] = useState(false);
+  const [shouldHide, setShouldHide] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,31 +18,22 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
     }
 
     const checkOverlap = () => {
-      if (!buttonRef.current) return;
-
-      // Get the button's current bounding rect
-      const currentButtonRect = buttonRef.current.getBoundingClientRect();
-
-      // Calculate where the button WOULD BE if positioned on the right (bottom-right position)
-      // We need to check overlap based on the default right position, not the current position
-      // to avoid a feedback loop where the button moves left, checks again, and moves back right
-      const buttonWidth = currentButtonRect.width;
-      const buttonHeight = currentButtonRect.height;
+      // Use actual dimensions if available, otherwise use default (48x48 for w-12 h-12)
+      const buttonWidth = buttonRef.current?.getBoundingClientRect().width || 48;
+      const buttonHeight = buttonRef.current?.getBoundingClientRect().height || 48;
       const rightMargin = 24; // 1.5rem = 24px (from right-6 class)
       const bottomMargin = 24; // 1.5rem = 24px (from bottom-6 class)
 
-      // Calculate the hypothetical right position rect
-      const hypotheticalRightRect = {
-        right: window.innerWidth - rightMargin,
-        left: window.innerWidth - rightMargin - buttonWidth,
-        bottom: window.innerHeight - bottomMargin,
-        top: window.innerHeight - bottomMargin - buttonHeight,
-      };
+      // Calculate the button's hypothetical position in the bottom-right
+      const buttonTop = window.innerHeight - bottomMargin - buttonHeight;
+      const buttonRight = window.innerWidth - rightMargin;
+      const buttonLeft = buttonRight - buttonWidth;
 
       // Find all elements with "REPL" in their class name
       const replElements = document.querySelectorAll('[class*="REPL"]');
 
       let hasOverlap = false;
+      let isFullScreen = false;
 
       replElements.forEach((element) => {
         const rect = element.getBoundingClientRect();
@@ -53,18 +45,22 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
 
         if (!isVisible) return;
 
-        // Check if there's a horizontal and vertical overlap with the HYPOTHETICAL right position
-        const horizontalOverlap =
-          hypotheticalRightRect.right > rect.left && hypotheticalRightRect.left < rect.right;
-        const verticalOverlap =
-          hypotheticalRightRect.bottom > rect.top && hypotheticalRightRect.top < rect.bottom;
+        // Check if REPL is full screen (covers > 90% of viewport width)
+        if (rect.width > window.innerWidth * 0.9) {
+          isFullScreen = true;
+        }
+
+        // Check for both horizontal AND vertical overlap with the button's position
+        const horizontalOverlap = rect.right > buttonLeft && rect.left < buttonRight;
+        const verticalOverlap = rect.bottom > buttonTop && rect.top < window.innerHeight;
 
         if (horizontalOverlap && verticalOverlap) {
           hasOverlap = true;
         }
       });
 
-      setShouldShiftLeft(hasOverlap);
+      setShouldHide(isFullScreen);
+      setShouldShiftLeft(hasOverlap && !isFullScreen);
     };
 
     // Check overlap initially
@@ -92,6 +88,11 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
     };
   }, [position]);
 
+  // Hide completely if REPL is full screen
+  if (shouldHide) {
+    return null;
+  }
+
   // Determine the position class based on the original position and overlap detection
   const positionClass = position === 'bottom-left' || (position === 'bottom-right' && shouldShiftLeft)
     ? 'left-6'
@@ -100,7 +101,7 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
   return (
     <div
       ref={buttonRef}
-      className={`fixed bottom-6 ${positionClass} z-50`}
+      className={`fixed bottom-6 ${positionClass} z-[9999]`}
     >
       <button
         onClick={onClick}
@@ -108,7 +109,9 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
         style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
         aria-label="Show widget"
       >
-        <span className="material-icons-hub text-white text-2xl">x</span>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white">
+          <path d="m19 9 1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+        </svg>
       </button>
     </div>
   );
