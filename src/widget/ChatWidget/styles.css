@@ -4,6 +4,7 @@
   /* Default Primary and Secondary Colors */
   --color-primary: #4a5565;
   --color-secondary: #ffffff;
+  --font-sans: "Barlow", sans-serif;
 }
 
 @keyframes fadeIn {
@@ -144,7 +145,7 @@
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
   font-size: 0.875em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   color: #1f2937;
 }
 
