@@ -13,7 +13,7 @@ interface Props {
   primaryColor?: string;
   secondaryColor?: string;
   logoUrl?: string;
-  closedIconPosition?: 'bottom-left' | 'bottom-right';
+  closedIconPosition?: "bottom-left" | "bottom-right";
   enabled?: boolean;
 }
 
@@ -24,7 +24,7 @@ export const ChatWidget = ({
   primaryColor,
   secondaryColor,
   logoUrl = "https://docs.ragpi.io/img/ragpi-logo-black.png",
-  closedIconPosition = 'bottom-right',
+  closedIconPosition = "bottom-right",
   enabled = true,
 }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,8 +32,8 @@ export const ChatWidget = ({
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(() => {
-    const stored = localStorage.getItem('ragpi-widget-visible');
-    return stored === null ? true : stored === 'true';
+    const stored = localStorage.getItem("ragpi-widget-visible");
+    return stored === null ? true : stored === "true";
   });
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -84,14 +84,35 @@ export const ChatWidget = ({
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        if (data.error === "verification_failed") {
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          // response body wasn't JSON
+        }
+        if (data?.error === "verification_failed") {
           setError(
-            "We have detected unusual activity. Please try again later."
+            "We have detected unusual activity. Please try again later.",
+          );
+
+          document.dispatchEvent(
+            new CustomEvent("ragpi:error", {
+              detail: {
+                message: "verification_failed",
+              },
+            }),
           );
         } else {
-          console.log("Error:", data);
+          console.error("Error:", data);
           setError("An error occurred. Please try again later.");
+
+          document.dispatchEvent(
+            new CustomEvent("ragpi:error", {
+              detail: {
+                message: JSON.stringify(data),
+              },
+            }),
+          );
         }
       } else {
         const data: ChatResponse = await response.json();
@@ -107,6 +128,14 @@ export const ChatWidget = ({
       console.error("Error:", error);
       setIsFetching(false);
       setError("An error occurred. Please try again later.");
+
+      document.dispatchEvent(
+        new CustomEvent("ragpi:error", {
+          detail: {
+            message: error instanceof Error ? error.message : String(error),
+          },
+        }),
+      );
     }
   };
 
@@ -128,7 +157,7 @@ export const ChatWidget = ({
 
   useEffect(() => {
     // Persist widget visibility to localStorage
-    localStorage.setItem('ragpi-widget-visible', String(isWidgetVisible));
+    localStorage.setItem("ragpi-widget-visible", String(isWidgetVisible));
   }, [isWidgetVisible]);
 
   useEffect(() => {
@@ -143,7 +172,7 @@ export const ChatWidget = ({
       if (secondaryColor) {
         containerRef.current.style.setProperty(
           "--color-secondary",
-          secondaryColor
+          secondaryColor,
         );
       } else {
         containerRef.current.style.removeProperty("--color-secondary");
@@ -178,7 +207,10 @@ export const ChatWidget = ({
           )}
         </>
       ) : (
-        <HubIconButton onClick={handleShowWidget} position={closedIconPosition} />
+        <HubIconButton
+          onClick={handleShowWidget}
+          position={closedIconPosition}
+        />
       )}
     </root.div>
   );
