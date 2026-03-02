@@ -1,0 +1,30 @@
+name: Build Widget
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Commit updated dist if changed
+        run: |
+          git diff --quiet dist/ragpi-widget.js && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/ragpi-widget.js
+          git commit -m "build: update dist/ragpi-widget.js"
+          git push
