@@ -2,9 +2,14 @@ import { createRoot } from "react-dom/client";
 import { ChatWidget } from "./ChatWidget";
 import "./index.css";
 
+// Capture the embedding <script> synchronously while the bundle executes;
+// document.currentScript reads as null once init is deferred into an idle
+// callback, so we resolve the reference now and fall back to a query otherwise.
+const currentScript = document.currentScript;
+
 const initWidget = () => {
   const scriptTag =
-    document.currentScript ||
+    currentScript ||
     document.querySelector(
       "script[data-recaptcha-site-key][data-ragpi-gateway-url]"
     );
@@ -61,8 +66,20 @@ const initWidget = () => {
   );
 };
 
+// Mount during browser idle time so widget init yields to the host page's own
+// work, improving Total Blocking Time / Speed Index. The timeout guarantees the
+// widget still mounts on a perpetually busy page; browsers without
+// requestIdleCallback fall back to a near-immediate timeout.
+const scheduleInit = () => {
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(initWidget, { timeout: 2000 });
+  } else {
+    setTimeout(initWidget, 1);
+  }
+};
+
 if (document.readyState === "complete") {
-  initWidget();
+  scheduleInit();
 } else {
-  document.addEventListener("DOMContentLoaded", initWidget);
+  document.addEventListener("DOMContentLoaded", scheduleInit);
 }

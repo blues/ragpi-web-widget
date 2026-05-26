@@ -1,11 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import root from "react-shadow";
-import { ChatModal } from "./ChatModal";
 import { ChatButton } from "./ChatButton";
 import { HubIconButton } from "./HubIconButton";
 import { ChatMessage, ChatRequest, ChatResponse } from "./types";
 import { loadRecaptcha } from "../recaptcha";
 import styles from "./styles.css?inline";
+
+// Lazy-load the chat panel (and with it the heavy markdown + syntax-highlighter
+// dependencies it renders) so they aren't initialized until the user first
+// opens the chat. The import() fires on the same click that opens the panel,
+// keeping that cost off the initial load of every page that embeds the widget.
+const ChatModal = lazy(() =>
+  import("./ChatModal").then((m) => ({ default: m.ChatModal }))
+);
 
 interface Props {
   recaptchaSiteKey: string;
@@ -200,16 +207,18 @@ export const ChatWidget = ({
           <ChatButton onClick={handleOpenModal} onHide={handleHideWidget} />
 
           {isModalOpen && (
-            <ChatModal
-              logoUrl={logoUrl}
-              recaptchaSiteKey={recaptchaSiteKey}
-              onCloseModal={handleCloseModal}
-              onClearHistory={handleClearHistory}
-              onSendMessage={handleSendMessage}
-              messages={messages}
-              loading={isFetching}
-              error={error}
-            />
+            <Suspense fallback={null}>
+              <ChatModal
+                logoUrl={logoUrl}
+                recaptchaSiteKey={recaptchaSiteKey}
+                onCloseModal={handleCloseModal}
+                onClearHistory={handleClearHistory}
+                onSendMessage={handleSendMessage}
+                messages={messages}
+                loading={isFetching}
+                error={error}
+              />
+            </Suspense>
           )}
         </>
       ) : (
