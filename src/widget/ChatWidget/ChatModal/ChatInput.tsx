@@ -1,17 +1,6 @@
 import { KeyboardEvent, useState, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-
-declare global {
-  interface Window {
-    grecaptcha: {
-      ready: (callback: () => void) => void;
-      execute: (
-        siteKey: string,
-        options: { action: string }
-      ) => Promise<string>;
-    };
-  }
-}
+import { executeRecaptcha } from "../../recaptcha";
 
 interface Props {
   recaptchaSiteKey: string;
@@ -43,21 +32,20 @@ export const ChatInput = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading || !inputText.trim()) return;
 
-    window.grecaptcha.ready(() => {
-      window.grecaptcha
-        .execute(recaptchaSiteKey, {
-          action: "submit",
-        })
-        .then((token: string) => {
-          onSendMessage(inputText, token);
-
-          setInputText("");
-        });
-    });
+    const message = inputText;
+    try {
+      // Awaits the lazy script load if it hasn't finished yet, so sending
+      // before reCAPTCHA is ready waits rather than failing silently.
+      const token = await executeRecaptcha(recaptchaSiteKey, "submit");
+      onSendMessage(message, token);
+      setInputText("");
+    } catch (err) {
+      console.error("reCAPTCHA failed to load:", err);
+    }
   };
 
   return (
