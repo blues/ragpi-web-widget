@@ -4,6 +4,7 @@ import { ChatModal } from "./ChatModal";
 import { ChatButton } from "./ChatButton";
 import { HubIconButton } from "./HubIconButton";
 import { ChatMessage, ChatRequest, ChatResponse } from "./types";
+import { loadRecaptcha } from "../recaptcha";
 import styles from "./styles.css?inline";
 
 interface Props {
@@ -39,6 +40,11 @@ export const ChatWidget = ({
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+    // Lazily inject reCAPTCHA the first time the chat panel opens, so its token
+    // is ready by send time without loading the script on every embedding page.
+    // loadRecaptcha is idempotent, so reopening the panel is a no-op. Errors are
+    // surfaced later at send time via executeRecaptcha.
+    void loadRecaptcha(recaptchaSiteKey).catch(() => {});
   };
 
   const handleCloseModal = () => {

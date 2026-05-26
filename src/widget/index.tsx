@@ -43,14 +43,9 @@ const initWidget = () => {
   container.id = "ragpi-widget";
   document.body.appendChild(container);
 
-  if (!window.grecaptcha) {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-  }
-
+  // reCAPTCHA is no longer injected here. It loads lazily when the user first
+  // opens the chat panel (see ChatWidget handleOpenModal / recaptcha.ts), so
+  // pages that embed the widget but never open it avoid the script's cost.
   const reactRoot = createRoot(container);
   reactRoot.render(
     <ChatWidget
