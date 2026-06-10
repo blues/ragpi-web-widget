@@ -15,29 +15,34 @@ const currentScript = document.currentScript;
 // --- Public programmatic API: window.ragpiWidget -----------------------------
 // Lets the embedding page open/close the chat panel directly instead of
 // synthesizing clicks on the launcher button. The live controls come from the
-// mounted ChatWidget via registerControls(); until then, an open()/toggle() call
-// is queued and replayed once the widget mounts (the widget mounts on idle, so a
-// page that calls open() immediately would otherwise race the mount).
+// mounted ChatWidget via registerControls(); the widget mounts on idle, so calls
+// made before then operate on `pendingOpen` — a desired-open state that mirrors
+// the imperative contract (toggle flips it, isOpen reflects it) and is applied
+// once the widget mounts. This keeps pre-mount calls consistent: toggle()
+// twice nets back to closed, and isOpen() reports the queued intent.
 let liveControls: WidgetControls | null = null;
-let openWhenReady = false;
+let pendingOpen: boolean | null = null; // null = no pre-mount intent expressed
 
 const registerControls = (controls: WidgetControls | null) => {
   liveControls = controls;
-  if (controls && openWhenReady) {
-    openWhenReady = false;
-    controls.open();
+  if (controls && pendingOpen !== null) {
+    const wantOpen = pendingOpen;
+    pendingOpen = null;
+    // The widget mounts closed by default, so only an open intent needs applying.
+    if (wantOpen) controls.open();
   }
 };
 
 const ragpiWidget: WidgetControls = {
-  open: () => (liveControls ? liveControls.open() : void (openWhenReady = true)),
-  close: () => {
-    openWhenReady = false;
-    liveControls?.close();
+  open: () =>
+    liveControls ? liveControls.open() : void (pendingOpen = true),
+  close: () =>
+    liveControls ? liveControls.close() : void (pendingOpen = false),
+  toggle: () => {
+    if (liveControls) liveControls.toggle();
+    else pendingOpen = !(pendingOpen ?? false);
   },
-  toggle: () =>
-    liveControls ? liveControls.toggle() : void (openWhenReady = true),
-  isOpen: () => liveControls?.isOpen() ?? false,
+  isOpen: () => (liveControls ? liveControls.isOpen() : (pendingOpen ?? false)),
 };
 
 declare global {
