@@ -85,12 +85,19 @@ export const ChatWidget = ({
   };
 
   const handleSendMessage = async (message: string, recaptchaToken: string) => {
-    setIsFetching(true);
-    setError(null);
-
+    // Guard before flipping isFetching, otherwise an empty submit returns early
+    // and leaves the input locked with isFetching stuck true.
     if (message.trim() === "") return;
 
+    setIsFetching(true);
+    setError(null);
     setMessages([...messages, { role: "user", content: message }]);
+
+    // Abort the request if the gateway never responds; without this a hung
+    // request would keep isFetching true and lock the user out indefinitely.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const request: ChatRequest = {
         sources: ragpiSources,
@@ -104,6 +111,7 @@ export const ChatWidget = ({
           "x-recaptcha-token": recaptchaToken,
         },
         body: JSON.stringify(request),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -145,20 +153,31 @@ export const ChatWidget = ({
           { role: "assistant", content: data.message },
         ]);
       }
-
-      setIsFetching(false);
     } catch (error) {
+      const timedOut =
+        error instanceof DOMException && error.name === "AbortError";
       console.error("Error:", error);
-      setIsFetching(false);
-      setError("An error occurred. Please try again later.");
+      setError(
+        timedOut
+          ? "The request timed out. Please try again."
+          : "An error occurred. Please try again later.",
+      );
 
       document.dispatchEvent(
         new CustomEvent("ragpi:error", {
           detail: {
-            message: error instanceof Error ? error.message : String(error),
+            message: timedOut
+              ? "timeout"
+              : error instanceof Error
+                ? error.message
+                : String(error),
           },
         }),
       );
+    } finally {
+      // Always clear the timer and unlock the input, whatever the outcome.
+      clearTimeout(timeoutId);
+      setIsFetching(false);
     }
   };
 
