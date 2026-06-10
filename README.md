@@ -66,7 +66,7 @@ until the widget's own script executes. If your code might run first, either
 guard the call or wait for the `ragpi:ready` event:
 
 ```js
-// Option A — optional chaining (the call is queued internally if early)
+// Option A — optional chaining (no-op if the widget script hasn’t executed yet)
 window.ragpiWidget?.open();
 
 // Option B — wait for the API to be attached
