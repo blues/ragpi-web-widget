@@ -11,7 +11,10 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
   const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let frame = 0;
+
     const checkOverlap = () => {
+      frame = 0;
       // Only check for overlaps if the position is bottom-right
       if (position !== 'bottom-right') {
         setShouldShiftLeft(false);
@@ -63,11 +66,20 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
       setShouldShiftLeft(hasOverlap && !isFullScreen);
     };
 
+    // Coalesce bursts of mutations/resizes into a single layout read per frame.
+    // The observer below watches the whole host document, so without this a busy
+    // page could trigger checkOverlap (and its getBoundingClientRect /
+    // getComputedStyle reads) many times per frame — classic layout thrashing.
+    const scheduleCheck = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(checkOverlap);
+    };
+
     // Check overlap initially
     checkOverlap();
 
     // Set up a MutationObserver to watch for DOM changes
-    const observer = new MutationObserver(checkOverlap);
+    const observer = new MutationObserver(scheduleCheck);
     observer.observe(document.body, {
       attributes: true,
       childList: true,
@@ -76,14 +88,16 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
     });
 
     // Also check on window resize
-    window.addEventListener('resize', checkOverlap);
+    window.addEventListener('resize', scheduleCheck);
 
-    // Check periodically as a fallback
-    const interval = setInterval(checkOverlap, 1000);
+    // Safety net for layout shifts the observer can't see (e.g. async font
+    // loads). Longer than the old 1s tick since the observer now handles churn.
+    const interval = setInterval(scheduleCheck, 2000);
 
     return () => {
+      if (frame) cancelAnimationFrame(frame);
       observer.disconnect();
-      window.removeEventListener('resize', checkOverlap);
+      window.removeEventListener('resize', scheduleCheck);
       clearInterval(interval);
     };
   }, [position]);

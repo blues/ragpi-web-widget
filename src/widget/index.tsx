@@ -1,11 +1,60 @@
 import { createRoot } from "react-dom/client";
 import { ChatWidget } from "./ChatWidget";
-import "./index.css";
+import { WidgetControls } from "./ChatWidget/types";
+// Imported as a string and injected into <head> below. With ESM code-splitting a
+// plain `import "./index.css"` would emit a separate .css file that the embed
+// <script> never loads; inlining keeps this global rule (it hides the reCAPTCHA
+// badge, which lives in the main document, not the widget's shadow root) working.
+import globalStyles from "./index.css?inline";
 
 // Capture the embedding <script> synchronously while the bundle executes;
 // document.currentScript reads as null once init is deferred into an idle
 // callback, so we resolve the reference now and fall back to a query otherwise.
 const currentScript = document.currentScript;
+
+// --- Public programmatic API: window.ragpiWidget -----------------------------
+// Lets the embedding page open/close the chat panel directly instead of
+// synthesizing clicks on the launcher button. The live controls come from the
+// mounted ChatWidget via registerControls(); the widget mounts on idle, so calls
+// made before then operate on `pendingOpen` — a desired-open state that mirrors
+// the imperative contract (toggle flips it, isOpen reflects it) and is applied
+// once the widget mounts. This keeps pre-mount calls consistent: toggle()
+// twice nets back to closed, and isOpen() reports the queued intent.
+let liveControls: WidgetControls | null = null;
+let pendingOpen: boolean | null = null; // null = no pre-mount intent expressed
+
+const registerControls = (controls: WidgetControls | null) => {
+  liveControls = controls;
+  if (controls && pendingOpen !== null) {
+    const wantOpen = pendingOpen;
+    pendingOpen = null;
+    // The widget mounts closed by default, so only an open intent needs applying.
+    if (wantOpen) controls.open();
+  }
+};
+
+const ragpiWidget: WidgetControls = {
+  open: () =>
+    liveControls ? liveControls.open() : void (pendingOpen = true),
+  close: () =>
+    liveControls ? liveControls.close() : void (pendingOpen = false),
+  toggle: () => {
+    if (liveControls) liveControls.toggle();
+    else pendingOpen = !(pendingOpen ?? false);
+  },
+  isOpen: () => (liveControls ? liveControls.isOpen() : (pendingOpen ?? false)),
+};
+
+declare global {
+  interface Window {
+    ragpiWidget?: WidgetControls;
+  }
+}
+
+window.ragpiWidget = ragpiWidget;
+// Fired once the API is attached, for pages that prefer to wait rather than
+// call window.ragpiWidget?.open() defensively.
+document.dispatchEvent(new CustomEvent("ragpi:ready"));
 
 const initWidget = () => {
   const scriptTag =
@@ -44,6 +93,13 @@ const initWidget = () => {
     return;
   }
 
+  if (!document.getElementById("ragpi-widget-global-styles")) {
+    const styleTag = document.createElement("style");
+    styleTag.id = "ragpi-widget-global-styles";
+    styleTag.textContent = globalStyles;
+    document.head.appendChild(styleTag);
+  }
+
   const container = document.createElement("div");
   container.id = "ragpi-widget";
   document.body.appendChild(container);
@@ -62,6 +118,7 @@ const initWidget = () => {
       logoUrl={logoUrl}
       closedIconPosition={closedIconPosition}
       enabled={enabled}
+      registerControls={registerControls}
     />
   );
 };

@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import root from "react-shadow";
 import { ChatButton } from "./ChatButton";
 import { HubIconButton } from "./HubIconButton";
-import { ChatMessage, ChatRequest, ChatResponse } from "./types";
+import { ChatMessage, ChatRequest, ChatResponse, WidgetControls } from "./types";
 import { loadRecaptcha } from "../recaptcha";
 import styles from "./styles.css?inline";
 
@@ -23,6 +23,9 @@ interface Props {
   logoUrl?: string;
   closedIconPosition?: "bottom-left" | "bottom-right";
   enabled?: boolean;
+  // Called once on mount with the imperative controls (and with null on unmount)
+  // so the bootstrap in index.tsx can expose them as window.ragpiWidget.
+  registerControls?: (controls: WidgetControls | null) => void;
 }
 
 export const ChatWidget = ({
@@ -34,6 +37,7 @@ export const ChatWidget = ({
   logoUrl = "https://docs.ragpi.io/img/ragpi-logo-black.png",
   closedIconPosition = "bottom-right",
   enabled = true,
+  registerControls,
 }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -44,6 +48,12 @@ export const ChatWidget = ({
     return stored === null ? true : stored === "true";
   });
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Mirror the open state in a ref so the imperative controls (registered once
+  // on mount) can read the current value without being rebuilt every toggle.
+  const isModalOpenRef = useRef(isModalOpen);
+  useEffect(() => {
+    isModalOpenRef.current = isModalOpen;
+  }, [isModalOpen]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -75,12 +85,19 @@ export const ChatWidget = ({
   };
 
   const handleSendMessage = async (message: string, recaptchaToken: string) => {
-    setIsFetching(true);
-    setError(null);
-
+    // Guard before flipping isFetching, otherwise an empty submit returns early
+    // and leaves the input locked with isFetching stuck true.
     if (message.trim() === "") return;
 
+    setIsFetching(true);
+    setError(null);
     setMessages([...messages, { role: "user", content: message }]);
+
+    // Abort the request if the gateway never responds; without this a hung
+    // request would keep isFetching true and lock the user out indefinitely.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const request: ChatRequest = {
         sources: ragpiSources,
@@ -94,6 +111,7 @@ export const ChatWidget = ({
           "x-recaptcha-token": recaptchaToken,
         },
         body: JSON.stringify(request),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -135,20 +153,31 @@ export const ChatWidget = ({
           { role: "assistant", content: data.message },
         ]);
       }
-
-      setIsFetching(false);
     } catch (error) {
+      const timedOut =
+        error instanceof DOMException && error.name === "AbortError";
       console.error("Error:", error);
-      setIsFetching(false);
-      setError("An error occurred. Please try again later.");
+      setError(
+        timedOut
+          ? "The request timed out. Please try again."
+          : "An error occurred. Please try again later.",
+      );
 
       document.dispatchEvent(
         new CustomEvent("ragpi:error", {
           detail: {
-            message: error instanceof Error ? error.message : String(error),
+            message: timedOut
+              ? "timeout"
+              : error instanceof Error
+                ? error.message
+                : String(error),
           },
         }),
       );
+    } finally {
+      // Always clear the timer and unlock the input, whatever the outcome.
+      clearTimeout(timeoutId);
+      setIsFetching(false);
     }
   };
 
@@ -172,6 +201,26 @@ export const ChatWidget = ({
     // Persist widget visibility to localStorage
     localStorage.setItem("ragpi-widget-visible", String(isWidgetVisible));
   }, [isWidgetVisible]);
+
+  useEffect(() => {
+    // Publish the imperative controls so the embedding page can drive the panel
+    // via window.ragpiWidget (see index.tsx). Built from stable setters + the
+    // open-state ref, so it's registered once and never goes stale.
+    if (!registerControls) return;
+    const openPanel = () => {
+      setIsWidgetVisible(true);
+      setIsModalOpen(true);
+      // Mirror handleOpenModal: warm up reCAPTCHA on first open. Idempotent.
+      void loadRecaptcha(recaptchaSiteKey).catch(() => {});
+    };
+    registerControls({
+      open: openPanel,
+      close: () => setIsModalOpen(false),
+      toggle: () => (isModalOpenRef.current ? setIsModalOpen(false) : openPanel()),
+      isOpen: () => isModalOpenRef.current,
+    });
+    return () => registerControls(null);
+  }, [recaptchaSiteKey, registerControls]);
 
   useEffect(() => {
     // Default Colors are set in the index.css file

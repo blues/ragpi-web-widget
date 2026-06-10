@@ -63,7 +63,7 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
           onClick={onClick}
           className="bg-white hover:bg-gray-50 text-gray-600 rounded-lg px-5 py-2.5 cursor-pointer shadow-lg flex items-center gap-4 transition-all duration-500 hover:scale-105"
           style={{ border: '1px solid #D1D5DB' }}
-          aria-label="Open chat"
+          aria-label={displayText}
         >
           <span className="text-base">{displayText}</span>
           {!isMobile && <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>}
