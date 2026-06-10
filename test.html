@@ -74,6 +74,7 @@
   </div>
 
   <button class="toggle-button" id="toggleRepl">Toggle REPL</button>
+  <button class="toggle-button" id="apiOpenChat" style="top: 70px;">Open chat (API)</button>
 
   <div class="repl-container hidden REPL" id="replPanel">
     <div class="repl-header">
@@ -96,9 +97,16 @@
       replPanel.classList.toggle('hidden');
       toggleBtn.textContent = replPanel.classList.contains('hidden') ? 'Toggle REPL' : 'Hide REPL';
     });
+
+    // Demo of the programmatic API. window.ragpiWidget exposes open/close/toggle/
+    // isOpen and is safe to call even before the widget finishes mounting (the
+    // call is queued). No need to find the launcher button by its aria-label.
+    document.getElementById('apiOpenChat').addEventListener('click', () => {
+      window.ragpiWidget?.toggle();
+    });
   </script>
 
-  <script src="./dist/ragpi-widget.js" data-recaptcha-site-key="6Lchqv0qAAAAAG3VayanOfH0M2x3yIqFqI8OFfei"
+  <script type="module" src="./dist/ragpi-widget.js" data-recaptcha-site-key="6Lchqv0qAAAAAG3VayanOfH0M2x3yIqFqI8OFfei"
     data-ragpi-gateway-url="http://localhost:8080/chat" data-ragpi-sources="fastapi_docs" data-primary-color="#fb2c36"
     data-logo-url="http://localhost:8000/blues-logo.png" data-closed-icon-position="bottom-right"></script>
 </body>

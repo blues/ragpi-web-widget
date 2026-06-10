@@ -11,9 +11,10 @@ import bash from "react-syntax-highlighter/dist/esm/languages/hljs/bash";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import cpp from "react-syntax-highlighter/dist/esm/languages/hljs/cpp";
 import c from "react-syntax-highlighter/dist/esm/languages/hljs/c";
-// Use a lighter style
-import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import remarkGfm from "remark-gfm";
+// Use a lighter style. Import the single style file directly instead of the
+// styles/hljs barrel so the bundler can't pull in all ~99 themes.
+import docco from "react-syntax-highlighter/dist/esm/styles/hljs/docco";
+import { remarkGfmTable } from "./remarkGfmTable";
 
 // Register only the languages we need
 SyntaxHighlighter.registerLanguage('javascript', javascript);
@@ -85,7 +86,7 @@ export const ChatMessages = ({ messages }: Props) => {
                 <div className="mb-8">
                   <div className="text-gray-800 prose max-w-none text-left space-y-3">
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                      remarkPlugins={[remarkGfmTable]}
                       components={{
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         code({ children, className, node, ref, ...props }) {

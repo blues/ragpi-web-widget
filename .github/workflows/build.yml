@@ -22,9 +22,11 @@ jobs:
 
       - name: Commit updated dist if changed
         run: |
-          git diff --quiet dist/ragpi-widget.js && exit 0
+          # The build now emits a code-split chunk alongside the entry, so stage
+          # the whole dist/ (not just ragpi-widget.js) and detect changes there.
+          git add -A dist/
+          git diff --cached --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/ragpi-widget.js
-          git commit -m "build: update dist/ragpi-widget.js"
+          git commit -m "build: update dist/"
           git push
