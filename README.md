@@ -25,7 +25,7 @@ Load the widget with a single `<script type="module">` tag:
 ```
 
 > [!IMPORTANT]
-> The `type="module"` attribute is required. The widget code-splits the chat
+> The `type="module"` attribute is required (module scripts are fetched with CORS, so ensure your CDN serves `ragpi-widget.js` and `ragpi-widget-chat-*.js` with appropriate `Access-Control-Allow-Origin` headers). The widget code-splits the chat
 > panel into a separate, lazily-loaded file (`ragpi-widget-chat-*.js`) that is
 > only fetched the first time a user opens the chat. The entry script references
 > that chunk by a path relative to its own URL, which only resolves correctly
