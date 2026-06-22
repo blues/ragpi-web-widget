@@ -67,7 +67,7 @@ export const ChatInput = ({
           style={{
             backgroundColor: loading || !inputText.trim()
               ? 'rgba(62, 90, 255, 0.4)'
-              : 'rgba(62, 90, 255, 0.8)',
+              : 'rgba(62, 90, 255, 1)',
             cursor: loading || !inputText.trim() ? 'not-allowed' : 'pointer'
           }}
         >
