@@ -120,7 +120,7 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
       <button
         onClick={onClick}
         className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110"
-        style={{ backgroundColor: 'rgba(62, 90, 255, 1)' }}
+        style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
         aria-label="Show widget"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white">

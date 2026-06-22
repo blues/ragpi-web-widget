@@ -27,7 +27,7 @@ export const ChatModal = ({
 }: Props) => {
   return (
     <div
-      className="fixed inset-0 bg-gray-200/30 flex items-center justify-center p-4 z-[9999] animate-fadeIn"
+      className="fixed inset-0 bg-gray-200/50 flex items-center justify-center p-4 z-[9999] animate-fadeIn"
       onClick={onCloseModal}
     >
       <div

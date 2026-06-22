@@ -69,7 +69,7 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
           {!isMobile && <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>}
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(62, 90, 255, 1)' }}
+            style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
           >
             <svg
               width="16"
