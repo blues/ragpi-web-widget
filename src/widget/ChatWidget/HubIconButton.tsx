@@ -24,8 +24,8 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
       // Use actual dimensions if available, otherwise use default (48x48 for w-12 h-12)
       const buttonWidth = buttonRef.current?.getBoundingClientRect().width || 48;
       const buttonHeight = buttonRef.current?.getBoundingClientRect().height || 48;
-      const rightMargin = 24; // 1.5rem = 24px (from right-6 class)
-      const bottomMargin = 24; // 1.5rem = 24px (from bottom-6 class)
+      const rightMargin = 24; // px (from right-6 class)
+      const bottomMargin = 10; // px (from bottom-[10px] class)
 
       // Calculate the button's hypothetical position in the bottom-right
       const buttonTop = window.innerHeight - bottomMargin - buttonHeight;
@@ -107,15 +107,20 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
     return null;
   }
 
-  // Determine the position class based on the original position and overlap detection
+  // Determine the position class based on the original position and overlap detection.
+  // The 48x48 size and 10px bottom offset match Cookiebot's floating badge, which is
+  // frequently on the same page as this widget. The horizontal offset only matches
+  // Cookiebot on the left, where nothing else competes for the corner; on the right
+  // it stays at 24px to clear macOS/iOS overlay scrollbars, which reserve no layout
+  // width and are therefore painted on top of a fixed element sitting at 10px.
   const positionClass = position === 'bottom-left' || (position === 'bottom-right' && shouldShiftLeft)
-    ? 'left-6'
+    ? 'left-[10px]'
     : 'right-6';
 
   return (
     <div
       ref={buttonRef}
-      className={`fixed bottom-6 ${positionClass} z-[9999]`}
+      className={`fixed bottom-[10px] ${positionClass} z-[9999]`}
     >
       <button
         onClick={onClick}
