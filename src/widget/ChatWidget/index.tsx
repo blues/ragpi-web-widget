@@ -14,6 +14,36 @@ const ChatModal = lazy(() =>
   import("./ChatModal").then((m) => ({ default: m.ChatModal }))
 );
 
+const VISIBILITY_STORAGE_KEY = "ragpi-widget-visible";
+
+// localStorage isn't guaranteed to work on the pages that embed this widget.
+// Browsers with DOM storage disabled expose window.localStorage as null (so the
+// optional chaining below is load-bearing), reading the property itself throws
+// SecurityError in a cross-origin iframe with third-party cookies blocked, and
+// setItem throws QuotaExceededError in Safari private browsing or when storage
+// is full. Unguarded, any of those throw out of render or the persist effect
+// and the widget never mounts, so every access goes through here: persistence
+// degrades to a no-op and the widget falls back to its default state. This is
+// deliberately scoped to these reads/writes -- we never patch
+// window.localStorage itself, since that would change storage
+// feature-detection for the whole host page.
+const safeStorage = {
+  get(key: string): string | null {
+    try {
+      return window.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string): void {
+    try {
+      window.localStorage?.setItem(key, value);
+    } catch {
+      // Storage unavailable or full; visibility just isn't persisted.
+    }
+  },
+};
+
 interface Props {
   recaptchaSiteKey: string;
   ragpiGatewayUrl: string;
@@ -44,7 +74,7 @@ export const ChatWidget = ({
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(() => {
-    const stored = localStorage.getItem("ragpi-widget-visible");
+    const stored = safeStorage.get(VISIBILITY_STORAGE_KEY);
     return stored === null ? true : stored === "true";
   });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -198,8 +228,8 @@ export const ChatWidget = ({
   }, [isModalOpen]);
 
   useEffect(() => {
-    // Persist widget visibility to localStorage
-    localStorage.setItem("ragpi-widget-visible", String(isWidgetVisible));
+    // Persist widget visibility to localStorage (a no-op if it's unavailable)
+    safeStorage.set(VISIBILITY_STORAGE_KEY, String(isWidgetVisible));
   }, [isWidgetVisible]);
 
   useEffect(() => {
