@@ -1,3 +1,7 @@
+/* Hiding the badge is only allowed if the reCAPTCHA branding is visible
+   elsewhere in the user flow (https://developers.google.com/recaptcha/docs/faq).
+   ChatModal/ChatFooter.tsx provides that attribution -- don't remove it while
+   this rule is here. */
 .grecaptcha-badge { 
   visibility: hidden !important;
 }
