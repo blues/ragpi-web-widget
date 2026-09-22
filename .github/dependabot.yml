@@ -1,0 +1,52 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(actions)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      # Majors stay separate so each can be reviewed and reverted on its own.
+      actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # build.yml and ci.yml both run `npm ci`, which hard-fails when package.json
+  # and package-lock.json disagree. Dependabot moves both in one PR.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Aliased to preact/compat at bundle time (vite.config.ts), so a React
+      # major preact has not caught up to breaks at runtime while CI stays green.
+      - dependency-name: "react"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "react-dom"
+        update-types:
+          - "version-update:semver-major"
+      # TypeScript 7 ships no JS API and typescript-eslint refuses to load
+      # against it, which takes `npm run lint` out entirely.
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
