@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # Also catches a package.json / package-lock.json desync before it reaches
+      # main and breaks build.yml.
+      - run: npm ci
+
+      - run: npm run lint
+
+      # `tsc -b && vite build`, so this typechecks too. Deliberately does not
+      # assert the committed dist/ matches; build.yml regenerates that on main.
+      - run: npm run build

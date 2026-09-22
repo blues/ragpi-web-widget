@@ -17,11 +17,11 @@ test('verify modal placeholder text and Blues Forum link', async ({ page }) => {
 
   // Take a screenshot of the modal with the placeholder text
   await page.screenshot({
-    path: 'modal-placeholder-screenshot.png',
+    path: 'screenshots/modal-placeholder-screenshot.png',
     fullPage: true
   });
 
-  console.log('Screenshot saved as modal-placeholder-screenshot.png');
+  console.log('Screenshot saved as screenshots/modal-placeholder-screenshot.png');
 
   // Verify the placeholder text contains the expected content
   const placeholderText = await page.locator('textarea, input[type="text"], [placeholder]').first();

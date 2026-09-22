@@ -1,0 +1,49 @@
+name: E2E (Playwright)
+
+# Manual-only until the suite is green: 24 pass / 9 fail against main's dist/ as
+# of 2026-09-22, all stale expectations rather than runner problems. Switch the
+# trigger to pull_request once they are fixed; nothing else needs to change.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # test.html loads ./dist/ragpi-widget.js, so the specs exercise the build
+      # output, not src/.
+      - run: npm run build
+
+      # webkit is not optional: mobile-responsive.spec.ts uses
+      # devices['iPhone 12'], whose defaultBrowserType is webkit. Without it
+      # those 13 tests fail as a missing-executable error.
+      - run: npx playwright install --with-deps chromium webkit
+
+      # playwright.config.ts starts the :8000 server itself.
+      - run: npm test
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
