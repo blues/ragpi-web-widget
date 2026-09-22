@@ -47,9 +47,12 @@ test.describe('Blues AI Widget - Comprehensive Tests', () => {
       const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
       await chatButton.waitFor({ state: 'visible', timeout: 10000 });
 
-      // Get initial transform before hover
-      const initialTransform = await chatButton.evaluate((el) =>
-        window.getComputedStyle(el).transform
+      // Read `scale`, not `transform`. The button uses Tailwind's
+      // hover:scale-105, and Tailwind v4 emits the standalone `scale` property
+      // rather than `transform: scale(...)`, so `transform` stays "none" on both
+      // sides of the hover and this assertion could never fire.
+      const initialScale = await chatButton.evaluate((el) =>
+        window.getComputedStyle(el).scale
       );
 
       // Hover over the button
@@ -62,17 +65,17 @@ test.describe('Blues AI Widget - Comprehensive Tests', () => {
         fullPage: true
       });
 
-      // Get transform after hover
-      const hoverTransform = await chatButton.evaluate((el) =>
-        window.getComputedStyle(el).transform
+      const hoverScale = await chatButton.evaluate((el) =>
+        window.getComputedStyle(el).scale
       );
 
-      // Verify transforms are different (indicating scale change)
-      expect(hoverTransform).not.toBe(initialTransform);
+      // Unhovered resolves to "none"; hover:scale-105 resolves to "1.05".
+      expect(hoverScale).not.toBe(initialScale);
+      expect(hoverScale).toBe('1.05');
 
       console.log('✓ Hover effect applied');
-      console.log(`  Initial transform: ${initialTransform}`);
-      console.log(`  Hover transform: ${hoverTransform}`);
+      console.log(`  Initial scale: ${initialScale}`);
+      console.log(`  Hover scale: ${hoverScale}`);
     });
 
     test('should open modal with Command-I keyboard shortcut', async () => {

@@ -1,49 +1,39 @@
 import { test, expect } from '@playwright/test';
 
+// The guidance copy this used to look for moved out of the composer's
+// placeholder attribute and into the empty-state message in
+// ChatModal/ChatMessages.tsx, so the old assertions were checking the wrong
+// element for text that no longer exists anywhere in src/. They were also
+// wrapped in `if (...)`, which let the test pass while asserting nothing --
+// notably the Blues Forum link check, which logged a note and passed when the
+// link was missing. Both are unconditional now.
 test('verify modal placeholder text and Blues Forum link', async ({ page }) => {
-  // Navigate to the test page
   await page.goto('http://localhost:8000/test.html');
-
-  // Wait for the page to load and widget to initialize
   await page.waitForTimeout(2000);
 
-  // Find and click the "Ask Blues AI a question..." button
   const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
   await chatButton.waitFor({ state: 'visible', timeout: 10000 });
   await chatButton.click();
-
-  // Wait for the modal to open
   await page.waitForTimeout(1000);
 
-  // Take a screenshot of the modal with the placeholder text
   await page.screenshot({
     path: 'screenshots/modal-placeholder-screenshot.png',
     fullPage: true
   });
 
-  console.log('Screenshot saved as screenshots/modal-placeholder-screenshot.png');
+  // The composer's own placeholder.
+  const composer = page.locator('textarea, input[type="text"], [placeholder]').first();
+  await expect(composer).toHaveAttribute('placeholder', 'Type your message...');
 
-  // Verify the placeholder text contains the expected content
-  const placeholderText = await page.locator('textarea, input[type="text"], [placeholder]').first();
-  const placeholder = await placeholderText.getAttribute('placeholder');
+  // The empty-state guidance, which is where the "talk to a human" copy lives.
+  // Rendered on desktop only (ChatMessages gates it on !isMobile), which the
+  // config's default Desktop Chrome viewport satisfies.
+  await expect(
+    page.getByText('Ask Blues AI your technical or product questions')
+  ).toBeVisible();
+  await expect(page.getByText('Want to talk to a human?')).toBeVisible();
 
-  console.log('Found placeholder text:', placeholder);
-
-  // Verify it contains the key phrases
-  if (placeholder) {
-    expect(placeholder).toContain('Send a message to start chatting with the Blues AI assistant');
-    expect(placeholder).toContain('Want to talk to a human?');
-    expect(placeholder).toContain('Reach out on the Blues Forum');
-  }
-
-  // Try to find and verify the Blues Forum link
   const forumLink = page.locator('a[href="https://discuss.blues.com"]');
-  const linkCount = await forumLink.count();
-
-  if (linkCount > 0) {
-    console.log('Found Blues Forum link!');
-    await expect(forumLink.first()).toHaveAttribute('href', 'https://discuss.blues.com');
-  } else {
-    console.log('Note: Blues Forum link might be in placeholder text rather than as a separate link element');
-  }
+  await expect(forumLink).toBeVisible();
+  await expect(forumLink).toHaveText('Blues Forum');
 });

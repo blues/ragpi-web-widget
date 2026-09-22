@@ -1,9 +1,7 @@
 name: E2E (Playwright)
 
-# Manual-only until the suite is green: 24 pass / 9 fail against main's dist/ as
-# of 2026-09-22, all stale expectations rather than runner problems. Switch the
-# trigger to pull_request once they are fixed; nothing else needs to change.
 on:
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -30,9 +28,10 @@ jobs:
       # output, not src/.
       - run: npm run build
 
-      # webkit is not optional: mobile-responsive.spec.ts uses
-      # devices['iPhone 12'], whose defaultBrowserType is webkit. Without it
-      # those 13 tests fail as a missing-executable error.
+      # webkit is not optional: mobile-responsive.spec.ts applies
+      # devices['iPhone 12'] at file scope, and its defaultBrowserType is webkit.
+      # Without it those 8 tests fail as a missing-executable error rather than
+      # any real assertion.
       - run: npx playwright install --with-deps chromium webkit
 
       # playwright.config.ts starts the :8000 server itself.

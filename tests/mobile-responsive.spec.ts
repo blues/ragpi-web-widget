@@ -1,10 +1,20 @@
 import { test, expect, devices } from '@playwright/test';
 
-const mobileTest = test.extend({});
-mobileTest.use(devices['iPhone 12']);
+// File scope, and this file holds ONLY mobile-viewport tests. It has to be file
+// scope because devices['iPhone 12'] carries defaultBrowserType: 'webkit', which
+// Playwright rejects inside a describe group ("forces a new worker").
+//
+// That constraint is why the desktop tests now live in desktop-responsive.spec.ts.
+// They used to share this file, each block applying options through a
+// `test.extend({})` clone, but test.use() at file scope applies to the WHOLE
+// file: the desktop 1024x768 viewport overrode the iPhone one here, so these
+// tests ran at width 1024, isMobile (window.innerWidth < 768) was false, and
+// every width-dependent assertion below failed. One viewport class per file
+// keeps that from coming back.
+test.use(devices['iPhone 12']);
 
 test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
-  mobileTest('should display mobile-optimized button text', async ({ page }) => {
+  test('should display mobile-optimized button text', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -24,7 +34,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Mobile button shows shortened text: "Ask Blues AI"');
   });
 
-  mobileTest('should hide keyboard shortcut on mobile', async ({ page }) => {
+  test('should hide keyboard shortcut on mobile', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -38,7 +48,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Keyboard shortcut hidden on mobile');
   });
 
-  mobileTest('should show thicker up arrow icon on mobile', async ({ page }) => {
+  test('should show thicker up arrow icon on mobile', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -60,7 +70,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Arrow icon has thicker stroke (3) on mobile');
   });
 
-  mobileTest('should always show close button on touch devices', async ({ page }) => {
+  test('should always show close button on touch devices', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -79,7 +89,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Close button always visible on touch devices');
   });
 
-  mobileTest('should display shortened header text on mobile', async ({ page }) => {
+  test('should display shortened header text on mobile', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -104,7 +114,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Header shows shortened text: "Blues AI"');
   });
 
-  mobileTest('should hide placeholder text on mobile', async ({ page }) => {
+  test('should hide placeholder text on mobile', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -114,7 +124,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     await page.waitForTimeout(1500);
 
     // Placeholder text should be hidden on mobile
-    const placeholderText = page.locator('text="Ask Blues AI your technical or product questions"');
+    const placeholderText = page.getByText('Ask Blues AI your technical or product questions');
     expect(await placeholderText.count()).toBe(0);
 
     // Blues Forum link should also be hidden
@@ -129,7 +139,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Placeholder text hidden on mobile');
   });
 
-  mobileTest('should test hide/show widget functionality on mobile', async ({ page }) => {
+  test('should test hide/show widget functionality on mobile', async ({ page }) => {
     await page.goto('http://localhost:8000/test.html');
     await page.waitForTimeout(2000);
 
@@ -163,7 +173,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('✓ Hide/show widget functionality works on mobile');
   });
 
-  mobileTest('Mobile: Full interaction flow', async ({ page }) => {
+  test('Mobile: Full interaction flow', async ({ page }) => {
     console.log('\n=== MOBILE INTERACTION FLOW ===\n');
 
     await page.goto('http://localhost:8000/test.html');
@@ -195,7 +205,7 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('5. Mobile header verified');
 
     // 6. Verify no placeholder text
-    const placeholder = page.locator('text="Ask Blues AI your technical or product questions"');
+    const placeholder = page.getByText('Ask Blues AI your technical or product questions');
     expect(await placeholder.count()).toBe(0);
     console.log('6. Placeholder hidden on mobile');
 
@@ -206,88 +216,5 @@ test.describe('Blues AI Widget - Mobile Responsive Tests', () => {
     console.log('7. Modal closed');
 
     console.log('\n=== MOBILE FLOW COMPLETE ===\n');
-  });
-});
-
-const desktopTest = test.extend({});
-desktopTest.use({
-  viewport: { width: 1024, height: 768 },
-});
-
-test.describe('Blues AI Widget - Tablet/Desktop Responsive Tests', () => {
-  desktopTest('should display full text on desktop', async ({ page }) => {
-    await page.goto('http://localhost:8000/test.html');
-    await page.waitForTimeout(2000);
-
-    // On desktop, full button text should be visible
-    const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
-    await expect(chatButton).toBeVisible({ timeout: 10000 });
-
-    await page.screenshot({
-      path: 'screenshots/desktop-01-button.png',
-      fullPage: true
-    });
-
-    console.log('✓ Desktop shows full button text');
-  });
-
-  desktopTest('should show keyboard shortcut on desktop', async ({ page }) => {
-    await page.goto('http://localhost:8000/test.html');
-    await page.waitForTimeout(2000);
-
-    const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
-    await expect(chatButton).toBeVisible({ timeout: 10000 });
-
-    // Keyboard shortcut should be visible
-    const shortcutText = chatButton.locator('span:has-text("⌘I"), span:has-text("Ctrl-I")');
-    await expect(shortcutText.first()).toBeVisible();
-
-    console.log('✓ Keyboard shortcut visible on desktop');
-  });
-
-  desktopTest('should show full header text on desktop', async ({ page }) => {
-    await page.goto('http://localhost:8000/test.html');
-    await page.waitForTimeout(2000);
-
-    // Open modal
-    const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
-    await chatButton.click();
-    await page.waitForTimeout(1500);
-
-    // Full header should be visible
-    const header = page.locator('text="Blues AI: Your Technical Assistant"');
-    await expect(header).toBeVisible();
-
-    await page.screenshot({
-      path: 'screenshots/desktop-02-header.png',
-      fullPage: true
-    });
-
-    console.log('✓ Full header text visible on desktop');
-  });
-
-  desktopTest('should show placeholder text on desktop', async ({ page }) => {
-    await page.goto('http://localhost:8000/test.html');
-    await page.waitForTimeout(2000);
-
-    // Open modal
-    const chatButton = page.locator('button:has-text("Ask Blues AI a question...")');
-    await chatButton.click();
-    await page.waitForTimeout(1500);
-
-    // Placeholder text should be visible
-    const placeholderText = page.locator('text="Ask Blues AI your technical or product questions"');
-    await expect(placeholderText).toBeVisible();
-
-    // Forum link should be visible
-    const forumLink = page.locator('a[href*="discuss.blues.com"]');
-    await expect(forumLink).toBeVisible();
-
-    await page.screenshot({
-      path: 'screenshots/desktop-03-placeholder.png',
-      fullPage: true
-    });
-
-    console.log('✓ Placeholder text visible on desktop');
   });
 });
