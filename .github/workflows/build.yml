@@ -4,14 +4,23 @@ on:
   push:
     branches: [main]
 
+# Two main pushes can land inside one ~20s job window; without this both rebuild
+# dist/ and race on git push, and the loser fails non-fast-forward.
+concurrency:
+  group: build-widget-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    # Default is GitHub's 6h; p50 is 14s, max 44s.
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -29,4 +38,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "build: update dist/"
-          git push
+          git push origin HEAD:main
