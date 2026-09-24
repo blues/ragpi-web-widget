@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ACCENT, ACCENT_TEXT } from "./accent";
 
 interface Props {
   text?: string;
@@ -69,7 +70,7 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
           {!isMobile && <span className="text-sm text-gray-500 font-mono">{shortcutText}</span>}
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
+            style={{ backgroundColor: ACCENT, color: ACCENT_TEXT }}
           >
             <svg
               width="16"
@@ -77,7 +78,6 @@ export const ChatButton = ({ text = "Ask Blues AI a question...", onClick, onHid
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="text-white"
             >
               <path
                 d="M8 3L8 13M8 3L4 7M8 3L12 7"

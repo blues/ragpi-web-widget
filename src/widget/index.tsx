@@ -78,6 +78,11 @@ const initWidget = () => {
     scriptTag.getAttribute("data-primary-color") || undefined;
   const secondaryColor =
     scriptTag.getAttribute("data-secondary-color") || undefined;
+  const accentColor = scriptTag.getAttribute("data-accent-color") || undefined;
+  const accentTextColor =
+    scriptTag.getAttribute("data-accent-text-color") || undefined;
+  const accentRingColor =
+    scriptTag.getAttribute("data-accent-ring-color") || undefined;
   const logoUrl = scriptTag.getAttribute("data-logo-url") || undefined;
   const closedIconPosition =
     (scriptTag.getAttribute("data-closed-icon-position") as 'bottom-left' | 'bottom-right') || undefined;
@@ -115,6 +120,9 @@ const initWidget = () => {
       ragpiSources={ragpiSourcesArray}
       primaryColor={primaryColor}
       secondaryColor={secondaryColor}
+      accentColor={accentColor}
+      accentTextColor={accentTextColor}
+      accentRingColor={accentRingColor}
       logoUrl={logoUrl}
       closedIconPosition={closedIconPosition}
       enabled={enabled}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ACCENT, ACCENT_TEXT } from './accent';
 
 interface Props {
   onClick: () => void;
@@ -124,11 +125,29 @@ export const HubIconButton = ({ onClick, position = 'bottom-right' }: Props) => 
     >
       <button
         onClick={onClick}
-        className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110"
-        style={{ backgroundColor: 'rgba(62, 90, 255, 0.8)' }}
+        className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
+        style={{
+          backgroundColor: ACCENT,
+          color: ACCENT_TEXT,
+          /*
+           * Written out inline, not as Tailwind's `shadow-lg`/`ring-*`: those
+           * compose `--tw-*` custom properties that Tailwind registers with
+           * @property, and @property registrations don't apply inside a shadow
+           * root, so in Chrome the declaration went invalid and this button
+           * rendered with no shadow at all. The second and third layers are
+           * the `shadow-lg` values the class was meant to produce.
+           *
+           * The first layer is the optional ring (data-accent-ring-color),
+           * transparent unless set: an edge for pages whose backgrounds come
+           * close to the accent, since this button floats directly on the page
+           * with no surface of its own.
+           */
+          boxShadow:
+            "0 0 0 2px var(--ragpi-accent-ring, transparent), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        }}
         aria-label="Show widget"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor">
           <path d="m19 9 1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
         </svg>
       </button>

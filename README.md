@@ -39,11 +39,16 @@ Load the widget with a single `<script type="module">` tag:
 | `data-recaptcha-site-key` | ✅ | Google reCAPTCHA v3 site key. |
 | `data-ragpi-gateway-url` | ✅ | Base URL of your Ragpi API gateway. |
 | `data-ragpi-sources` | | Comma-separated list of knowledge-base sources. |
-| `data-primary-color` | | Primary theme color (CSS color value). |
+| `data-primary-color` | | Primary theme color (CSS color value). Currently used for the chat input's focus ring. |
 | `data-secondary-color` | | Secondary theme color. |
+| `data-accent-color` | | Fill of the action buttons: the prompt bar's arrow, the chat send button, and the floating "show widget" button. Any CSS color. Default `rgba(62, 90, 255, 0.8)`; the disabled send button uses this at half opacity. |
+| `data-accent-text-color` | | Color of the glyph on those buttons. Default `#ffffff`. |
+| `data-accent-ring-color` | | Optional 2px ring around the floating "show widget" button, for pages whose backgrounds come close to the accent color. Default: no ring. |
 | `data-logo-url` | | Logo shown in the chat header. |
 | `data-closed-icon-position` | | `bottom-left` or `bottom-right` (default). |
 | `data-enabled` | | Set to `false` to render nothing. |
+
+The accent attributes set the `--ragpi-accent`, `--ragpi-accent-text` and `--ragpi-accent-ring` custom properties on the widget's host element, so a page can equivalently set those in CSS on `#ragpi-widget` (for example, to reuse its own design tokens).
 
 ## Programmatic API
 
