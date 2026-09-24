@@ -50,6 +50,11 @@ interface Props {
   ragpiSources: string[];
   primaryColor?: string;
   secondaryColor?: string;
+  // Fill and glyph color of the action buttons, and an optional ring around
+  // the floating "show widget" button. See accent.ts.
+  accentColor?: string;
+  accentTextColor?: string;
+  accentRingColor?: string;
   logoUrl?: string;
   closedIconPosition?: "bottom-left" | "bottom-right";
   enabled?: boolean;
@@ -64,6 +69,9 @@ export const ChatWidget = ({
   ragpiSources,
   primaryColor,
   secondaryColor,
+  accentColor,
+  accentTextColor,
+  accentRingColor,
   logoUrl = "https://docs.ragpi.io/img/ragpi-logo-black.png",
   closedIconPosition = "bottom-right",
   enabled = true,
@@ -253,24 +261,27 @@ export const ChatWidget = ({
   }, [recaptchaSiteKey, registerControls]);
 
   useEffect(() => {
-    // Default Colors are set in the index.css file
-    if (containerRef.current) {
-      if (primaryColor) {
-        containerRef.current.style.setProperty("--color-primary", primaryColor);
+    // Set each configured color as a custom property on the shadow host, where
+    // it inherits into the widget; unset ones fall back to their defaults
+    // (--color-primary/--color-secondary in styles.css, --ragpi-accent* in
+    // accent.ts).
+    const host = containerRef.current;
+    if (!host) return;
+    const colors: [string, string | undefined][] = [
+      ["--color-primary", primaryColor],
+      ["--color-secondary", secondaryColor],
+      ["--ragpi-accent", accentColor],
+      ["--ragpi-accent-text", accentTextColor],
+      ["--ragpi-accent-ring", accentRingColor],
+    ];
+    for (const [property, value] of colors) {
+      if (value) {
+        host.style.setProperty(property, value);
       } else {
-        containerRef.current.style.removeProperty("--color-primary");
-      }
-
-      if (secondaryColor) {
-        containerRef.current.style.setProperty(
-          "--color-secondary",
-          secondaryColor,
-        );
-      } else {
-        containerRef.current.style.removeProperty("--color-secondary");
+        host.style.removeProperty(property);
       }
     }
-  }, [primaryColor, secondaryColor]);
+  }, [primaryColor, secondaryColor, accentColor, accentTextColor, accentRingColor]);
 
   // If widget is disabled, render nothing
   if (!enabled) {

@@ -1,6 +1,7 @@
 import { KeyboardEvent, useState, useEffect, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { executeRecaptcha } from "../../recaptcha";
+import { ACCENT, ACCENT_DISABLED, ACCENT_TEXT } from "../accent";
 
 interface Props {
   recaptchaSiteKey: string;
@@ -63,11 +64,12 @@ export const ChatInput = ({
         <button
           type="submit"
           disabled={loading || !inputText.trim()}
-          className="px-4 py-2 rounded-xl ml-3 text-white cursor-pointer"
+          className="px-4 py-2 rounded-xl ml-3 cursor-pointer"
           style={{
             backgroundColor: loading || !inputText.trim()
-              ? 'rgba(62, 90, 255, 0.4)'
-              : 'rgba(62, 90, 255, 0.8)',
+              ? ACCENT_DISABLED
+              : ACCENT,
+            color: ACCENT_TEXT,
             cursor: loading || !inputText.trim() ? 'not-allowed' : 'pointer'
           }}
         >
